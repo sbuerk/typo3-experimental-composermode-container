@@ -85,7 +85,7 @@ RUN cd /var/www/html \
       --license='GPL-2.0-or-later' \
       --no-interaction \
     && composer config "allow-plugins" true \
-    && composer require \
+    && composer require -W \
         "typo3/cms-about:^10.4" \
         "typo3/cms-adminpanel:^10.4" \
         "typo3/cms-backend:^10.4" \
@@ -115,6 +115,7 @@ RUN cd /var/www/html \
         "typo3/cms-setup:^10.4" \
         "typo3/cms-tstemplate:^10.4" \
         "typo3/cms-viewpage:^10.4" \
+        "typo3/cms-introduction":"^4.3.2" \
         "helhum/typo3-console":"^6.7.7" \
     && cp public/typo3/sysext/install/Resources/Private/FolderStructureTemplateFiles/root-htaccess public/.htaccess \
     && mkdir -p public/typo3temp \
