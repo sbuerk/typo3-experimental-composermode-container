@@ -121,12 +121,14 @@ RUN cd /var/www/html \
     && mkdir -p public/typo3conf \
     && mkdir -p public/fileadmin \
     && mkdir -p public/uploads \
-    && touch public/FIRST_INSTALL \
-    && touch FIRST_INSTALL \
-    && chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} .
+    && mkdir -p config \
+    && mkdir -p var \
+    && chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} ./
 
 # Configure volumes
 VOLUME /var/www/html/public/fileadmin
 VOLUME /var/www/html/public/typo3conf
 VOLUME /var/www/html/public/typo3temp
 VOLUME /var/www/html/public/uploads
+VOLUME /var/www/html/config
+VOLUME /var/www/html/var
