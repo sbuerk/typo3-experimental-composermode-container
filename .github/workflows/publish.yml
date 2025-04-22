@@ -85,7 +85,7 @@ jobs:
           build-args: |
             IMAGE_VERSION=${{ env.version }}
           tags: |
-            sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:test
+            ghcr.io/sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:test
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -97,5 +97,5 @@ jobs:
           build-args: |
             IMAGE_VERSION=${{ env.version }}
           tags: |
-            sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:${{ env.version }}
-            sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:latest
+            ghcr.io/sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:${{ env.version }}
+            ghcr.io/sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:latest
