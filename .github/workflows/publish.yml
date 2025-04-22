@@ -15,9 +15,32 @@ jobs:
       matrix:
         containerName: [ "1004" ]
     permissions:
+      # actions: read|write|none
+      actions: none
+      # checks: read|write|none
+      checks: none
+      # contents: read|write|none
       contents: write
+      # deployments: read|write|none
+      deployments: none
+      # id-token: read|write|none
+      id-token: none
+      # issues: read|write|none
+      issues: none
+      # discussions: read|write|none
+      discussions: none
+      # packages: read|write|none
       packages: write
+      # pages: read|write|none
+      pages: none
+      # pull-requests: read|write|none
+      pull-requests: none
+      # repository-projects: read|write|none
       repository-projects: read
+      # security-events: read|write|none
+      security-events: none
+      # statuses: read|write|none
+      statuses: none
     services:
       registry:
         image: registry:2
@@ -61,7 +84,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: |
             IMAGE_VERSION=${{ env.version }}
-          tags: sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:test
+          tags: |
+            sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:test
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -74,4 +98,4 @@ jobs:
             IMAGE_VERSION=${{ env.version }}
           tags: |
             sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:${{ env.version }}
-            ${{ matrix.containerName }}:latest
+            sbuerk/typo3-experimental-composermode-container-${{ matrix.containerName }}:latest

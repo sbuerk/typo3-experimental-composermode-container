@@ -30,6 +30,12 @@ LABEL maintainer="Stefan Bürk <stefan@buerk.tech>"
 # We use convenient install-php-extensions script to manage additional php extensions
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
+ENV APACHE_RUN_SERVERNAME="localhost" \
+    APACHE_RUN_USER="www-data" \
+    APACHE_RUN_GROUP="www-data" \
+    APACHE_RUN_DOCROOT="/usr/local/apache2/htdocs" \
+    COMPOSER_ALLOW_SUPERUSER=1
+
 # Install TYPO3
 RUN apt-get update && \
     apt-get upgrade -y && \
@@ -53,6 +59,9 @@ RUN apt-get update && \
     install-php-extensions @composer-2 && \
 # Configure Apache as needed
     a2enmod rewrite && \
+    sed -i s/'<Directory \/var\/www\/>'/'<Directory  ${APACHE_RUN_DOCROOT}>'/ /etc/apache2/conf-available/docker-php.conf && \
+    echo 'DocumentRoot ${APACHE_RUN_DOCROOT}' >> /etc/apache2/conf-available/docker-php.conf && \
+    echo 'ServerName ${APACHE_RUN_SERVERNAME}:80' >> /etc/apache2/conf-available/docker-php.conf && \
     apt-get clean && \
     apt-get -y purge \
         libxml2-dev libfreetype6-dev \
@@ -64,6 +73,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /usr/src/*
 
 RUN cd /var/www/html \
+    && chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} . \
     && composer init \
       --name='typo3/demo-instance-104' \
       --author='Stefan Bürk <stefan@buerk.tech>' \
@@ -108,9 +118,9 @@ RUN cd /var/www/html \
     && mkdir -p public/typo3conf \
     && mkdir -p public/fileadmin \
     && mkdir -p public/uploads \
-    && chown -R www-data. .
-
-ENV COMPOSER_ALLOW_SUPERUSER=1
+    && touch public/FIRST_INSTALL \
+    && touch FIRST_INSTALL \
+    && chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} .
 
 # Configure volumes
 VOLUME /var/www/html/public/fileadmin
