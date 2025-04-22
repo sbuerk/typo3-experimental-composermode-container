@@ -31,6 +31,7 @@ LABEL maintainer="Stefan Bürk <stefan@buerk.tech>"
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
 ENV APACHE_RUN_SERVERNAME="localhost" \
+    APACHE_RUN_DOMAIN="localhost" \
     APACHE_RUN_USER="www-data" \
     APACHE_RUN_GROUP="www-data" \
     APACHE_RUN_DOCROOT="/usr/local/apache2/htdocs" \
@@ -62,6 +63,8 @@ RUN apt-get update && \
     sed -i s/'<Directory \/var\/www\/>'/'<Directory  ${APACHE_RUN_DOCROOT}>'/ /etc/apache2/conf-available/docker-php.conf && \
     echo 'DocumentRoot ${APACHE_RUN_DOCROOT}' >> /etc/apache2/conf-available/docker-php.conf && \
     echo 'ServerName ${APACHE_RUN_SERVERNAME}:80' >> /etc/apache2/conf-available/docker-php.conf && \
+    sed -i s/'DocumentRoot \/var\/www\/html'/'DocumentRoot ${APACHE_RUN_DOCROOT}'/ /etc/apache2/sites-enabled/000-default.conf && \
+    sed -i s/'#ServerName www\.example\.com'/'ServerName ${APACHE_RUN_DOMAIN}'/ /etc/apache2/sites-enabled/000-default.conf && \
     apt-get clean && \
     apt-get -y purge \
         libxml2-dev libfreetype6-dev \
