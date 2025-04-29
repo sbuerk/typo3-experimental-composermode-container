@@ -92,3 +92,4 @@ VOLUME /var/www/html/project/typo3temp
 VOLUME /var/www/html/project/uploads
 VOLUME /var/www/html/project/config
 VOLUME /var/www/html/project/var
+VOLUME /var/www/html/shared
