@@ -19,7 +19,7 @@
 # do not make any changes to this file directly, and consult the
 # CONTRIBUTING document, first.
 
-FROM php:7.4-apache-buster
+FROM ghcr.io/sbuerk/typo3-base-apache2-phpfpm72:1.0
 ARG TARGETPLATFORM
 LABEL org.opencontainers.image.authors="Stefan Bürk <stefan@buerk.tech>"
 LABEL org.opencontainers.image.source=https://github.org/sbuerk/typo3-experimental-composermode-container/1004
@@ -27,56 +27,9 @@ LABEL org.opencontainers.image.url=https://github.org/sbuerk/typo3-experimental-
 LABEL org.opencontainers.image.description="sbuerk/typo3-experimental-composermode-container-1004"
 LABEL maintainer="Stefan Bürk <stefan@buerk.tech>"
 
-# We use convenient install-php-extensions script to manage additional php extensions
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+ENV PROJECT_DOCROOT="/var/www/html/project/public"
 
-ENV APACHE_RUN_SERVERNAME="localhost" \
-    APACHE_RUN_DOMAIN="localhost" \
-    APACHE_RUN_USER="www-data" \
-    APACHE_RUN_GROUP="www-data" \
-    APACHE_RUN_DOCROOT="/usr/local/apache2/htdocs" \
-    COMPOSER_ALLOW_SUPERUSER=1
-
-# Install TYPO3
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends \
-        wget \
-# Configure PHP
-        libxml2-dev libfreetype6-dev \
-        libjpeg62-turbo-dev \
-        libmcrypt-dev \
-        libpng-dev \
-        libpq-dev \
-        libzip-dev \
-        zlib1g-dev \
-# Install required 3rd party tools
-        graphicsmagick && \
-# Configure extensions
-    docker-php-ext-configure gd --with-libdir=/usr/include/ --with-jpeg --with-freetype && \
-    docker-php-ext-install -j$(nproc) mysqli soap gd zip opcache intl pgsql pdo_pgsql intl bcmath && \
-    echo 'always_populate_raw_post_data = -1\nmax_execution_time = 240\nmax_input_vars = 2500\nupload_max_filesize = 32M\npost_max_size = 32M' > /usr/local/etc/php/conf.d/typo3.ini && \
-    chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions @composer-2 && \
-# Configure Apache as needed
-    a2enmod rewrite && \
-    sed -i s/'<Directory \/var\/www\/>'/'<Directory  ${APACHE_RUN_DOCROOT}>'/ /etc/apache2/conf-available/docker-php.conf && \
-    echo 'DocumentRoot ${APACHE_RUN_DOCROOT}' >> /etc/apache2/conf-available/docker-php.conf && \
-    echo 'ServerName ${APACHE_RUN_SERVERNAME}:80' >> /etc/apache2/conf-available/docker-php.conf && \
-    sed -i s/'DocumentRoot \/var\/www\/html'/'DocumentRoot ${APACHE_RUN_DOCROOT}'/ /etc/apache2/sites-enabled/000-default.conf && \
-    sed -i s/'#ServerName www\.example\.com'/'ServerName ${APACHE_RUN_DOMAIN}'/ /etc/apache2/sites-enabled/000-default.conf && \
-    apt-get clean && \
-    apt-get -y purge \
-        libxml2-dev libfreetype6-dev \
-        libjpeg62-turbo-dev \
-        libmcrypt-dev \
-        libpng-dev \
-        libzip-dev \
-        zlib1g-dev && \
-    rm -rf /var/lib/apt/lists/* /usr/src/*
-
-RUN cd /var/www/html \
-    && chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} . \
+RUN cd /var/www/html/project \
     && composer init \
       --name='typo3/demo-instance-104' \
       --author='Stefan Bürk <stefan@buerk.tech>' \
@@ -124,12 +77,18 @@ RUN cd /var/www/html \
     && mkdir -p public/uploads \
     && mkdir -p config \
     && mkdir -p var \
-    && chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} ./
+    && cd /var/www/html \
+    && chmod -R a+rw project \
+    && chmod -R o+r project
+
+WORKDIR /var/www/html/project
+
+ENV PATH="$PROJECT_DOCROOT/bin:/var/www/html/project/bin:$PROJECT_DOCROOT/vendor/bin:/var/www/html/project/vendor/bin:$PATH"
 
 # Configure volumes
-VOLUME /var/www/html/public/fileadmin
-VOLUME /var/www/html/public/typo3conf
-VOLUME /var/www/html/public/typo3temp
-VOLUME /var/www/html/public/uploads
-VOLUME /var/www/html/config
-VOLUME /var/www/html/var
+VOLUME /var/www/html/project/public/fileadmin
+VOLUME /var/www/html/project/typo3conf
+VOLUME /var/www/html/project/typo3temp
+VOLUME /var/www/html/project/uploads
+VOLUME /var/www/html/project/config
+VOLUME /var/www/html/project/var
